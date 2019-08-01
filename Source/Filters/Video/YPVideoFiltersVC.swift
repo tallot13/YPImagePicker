@@ -14,6 +14,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     
     @IBOutlet weak var trimBottomItem: YPMenuItem!
     @IBOutlet weak var coverBottomItem: YPMenuItem!
+    @IBOutlet weak var timelineLabel: UILabel!
     
     @IBOutlet weak var videoView: YPVideoView!
     @IBOutlet weak var trimmerView: TrimmerView!
@@ -71,7 +72,10 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         // Set initial video cover
         imageGenerator = AVAssetImageGenerator(asset: self.inputAsset)
         imageGenerator?.appliesPreferredTrackTransform = true
+        imageGenerator?.requestedTimeToleranceAfter = CMTime.zero
+        imageGenerator?.requestedTimeToleranceBefore = CMTime.zero
         didChangeThumbPosition(CMTime(seconds: 1, preferredTimescale: 1))
+        updateTimeline()
         
         // Navigation bar setup
         title = YPConfig.wordings.trim
@@ -129,6 +133,8 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
             let destinationURL = URL(fileURLWithPath: NSTemporaryDirectory())
                 .appendingUniquePathComponent(pathExtension: YPConfig.video.fileType.fileExtension)
             
+            print("trimmed result duration \(String(describing:trimmedAsset.duration.seconds))")
+
             try trimmedAsset.export(to: destinationURL) { [weak self] in
                 guard let strongSelf = self else { return }
                 
@@ -156,6 +162,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         trimBottomItem.select()
         coverBottomItem.deselect()
 
+        timelineLabel.isHidden = false
         trimmerView.isHidden = false
         videoView.isHidden = false
         coverImageView.isHidden = true
@@ -168,6 +175,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         trimBottomItem.deselect()
         coverBottomItem.select()
         
+        timelineLabel.isHidden = true
         trimmerView.isHidden = true
         videoView.isHidden = true
         coverImageView.isHidden = false
@@ -235,6 +243,35 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
             trimmerView.seek(to: startTime)
         }
     }
+    
+    func updateTimeline() {
+        let end = (trimmerView.endTime ?? inputAsset.duration).seconds
+        let start = (trimmerView.startTime ?? CMTime.zero).seconds
+        let timeRange = CMTimeRangeFromTimeToTime(start: trimmerView.startTime ?? CMTime.zero, end: trimmerView.endTime ?? inputAsset.duration)
+
+        let rawDuration = end-start
+        let totalSeconds = round(rawDuration)
+        print("raw duration \(rawDuration)")
+        print("time range duration seconds: \(timeRange.duration.seconds)")
+        print("time range duration: \(timeRange.duration)")
+        print("start time: \(String(describing: trimmerView.startTime))")
+        print("end time: \(String(describing: trimmerView.endTime))")
+
+
+        
+        let hours:Int = Int(totalSeconds / 3600)
+        let minutes:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
+        let seconds:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
+        
+        var labelText = NSLocalizedString("Duration: %@", comment: "")
+        if hours > 0 {
+            labelText = String.localizedStringWithFormat(labelText, String(format: "%i:%02i:%02i", hours, minutes, seconds))
+        } else {
+            labelText = String.localizedStringWithFormat(labelText, String(format: "%02i:%02i", minutes, seconds))
+        }
+        
+        timelineLabel.text = labelText
+    }
 }
 
 // MARK: - TrimmerViewDelegate
@@ -247,18 +284,34 @@ extension YPVideoFiltersVC: TrimmerViewDelegate {
     }
     
     public func didChangePositionBar(_ playerTime: CMTime) {
+        print("didChangePositionBar")
         stopPlaybackTimeChecker()
         videoView.pause()
         videoView.player.seek(to: playerTime, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
+        if YPConfig.video.showTimeline {
+            updateTimeline()
+        }
     }
 }
 
 // MARK: - ThumbSelectorViewDelegate
 extension YPVideoFiltersVC: ThumbSelectorViewDelegate {
     public func didChangeThumbPosition(_ imageTime: CMTime) {
-        if let imageGenerator = imageGenerator,
-            let imageRef = try? imageGenerator.copyCGImage(at: imageTime, actualTime: nil) {
-            coverImageView.image = UIImage(cgImage: imageRef)
-        }
+        print(imageTime)
+        imageGenerator?.generateCGImagesAsynchronously(forTimes: [imageTime as NSValue],
+                                                  completionHandler: { (_, image, _, _, _) in
+                                                    guard let image = image else {
+                                                        return
+                                                    }
+                                                    DispatchQueue.main.async {
+                                                        self.imageGenerator?.cancelAllCGImageGeneration()
+                                                        let uiimage = UIImage(cgImage: image)
+                                                        self.coverImageView.image = uiimage
+                                                    }
+        })
+//        if let imageGenerator = imageGenerator,
+//            let imageRef = try? imageGenerator.copyCGImage(at: imageTime, actualTime: nil) {
+//            coverImageView.image = coverThumbSelectorView.ima
+//        }
     }
 }

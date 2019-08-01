@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -17,6 +15,7 @@
                 <outlet property="coverBottomItem" destination="qy9-MY-67C" id="LaY-F2-uVO"/>
                 <outlet property="coverImageView" destination="daH-No-sZc" id="sNy-7V-7gV"/>
                 <outlet property="coverThumbSelectorView" destination="Tqq-Gf-aeR" id="CZG-rg-NWB"/>
+                <outlet property="timelineLabel" destination="Uy5-eY-Zaa" id="ODQ-KB-cHE"/>
                 <outlet property="trimBottomItem" destination="uB8-a7-Vh0" id="7Rn-9o-WWN"/>
                 <outlet property="trimmerView" destination="W4N-1E-jNP" id="a4g-Mg-65j"/>
                 <outlet property="videoView" destination="AFl-Bk-oPH" id="x8U-ib-yqT"/>
@@ -57,9 +56,17 @@
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tqq-Gf-aeR" customClass="ThumbSelectorView" customModule="PryntTrimmerView">
                             <rect key="frame" x="30" y="77.5" width="315" height="77"/>
                         </view>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uy5-eY-Zaa">
+                            <rect key="frame" x="30" y="61.5" width="315" height="0.0"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
                     </subviews>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
+                        <constraint firstItem="Uy5-eY-Zaa" firstAttribute="trailing" secondItem="W4N-1E-jNP" secondAttribute="trailing" id="2XQ-gu-QXs"/>
+                        <constraint firstItem="Uy5-eY-Zaa" firstAttribute="leading" secondItem="W4N-1E-jNP" secondAttribute="leading" id="42j-je-9QS"/>
                         <constraint firstItem="Tqq-Gf-aeR" firstAttribute="leading" secondItem="W4N-1E-jNP" secondAttribute="leading" id="GFg-oD-rpc"/>
                         <constraint firstItem="W4N-1E-jNP" firstAttribute="leading" secondItem="dMy-Fy-gyR" secondAttribute="leading" constant="30" id="IGg-wF-gcV"/>
                         <constraint firstItem="W4N-1E-jNP" firstAttribute="height" secondItem="dMy-Fy-gyR" secondAttribute="height" multiplier="1:3" id="O8d-8f-QKt"/>
@@ -67,6 +74,7 @@
                         <constraint firstItem="W4N-1E-jNP" firstAttribute="centerY" secondItem="dMy-Fy-gyR" secondAttribute="centerY" id="Udn-il-obB"/>
                         <constraint firstItem="Tqq-Gf-aeR" firstAttribute="trailing" secondItem="W4N-1E-jNP" secondAttribute="trailing" id="bpp-dw-jOk"/>
                         <constraint firstAttribute="trailing" secondItem="W4N-1E-jNP" secondAttribute="trailing" constant="30" id="nMz-fm-d4C"/>
+                        <constraint firstItem="W4N-1E-jNP" firstAttribute="top" secondItem="Uy5-eY-Zaa" secondAttribute="bottom" constant="16" id="ro2-DK-XCf"/>
                         <constraint firstItem="Tqq-Gf-aeR" firstAttribute="bottom" secondItem="W4N-1E-jNP" secondAttribute="bottom" id="vGS-BO-IUw"/>
                     </constraints>
                 </view>
