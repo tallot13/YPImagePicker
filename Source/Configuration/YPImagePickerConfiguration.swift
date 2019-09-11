@@ -218,6 +218,9 @@ public struct YPConfigVideo {
     
     // show video length
     public var showTimeline: Bool = false
+    
+    // show cover button
+    public var showCoverButton: Bool = false
 
 }
 

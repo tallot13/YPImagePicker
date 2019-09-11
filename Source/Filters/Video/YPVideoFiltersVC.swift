@@ -21,7 +21,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     
     @IBOutlet weak var coverImageView: UIImageView!
     @IBOutlet weak var coverThumbSelectorView: ThumbSelectorView!
-
+    
     public var inputVideo: YPMediaVideo!
     public var inputAsset: AVAsset { return AVAsset(url: inputVideo.url) }
     
@@ -29,9 +29,9 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     private var imageGenerator: AVAssetImageGenerator?
     private var isFromSelectionVC = false
     
-    var didSave: ((YPMediaItem) -> Void)?
-    var didCancel: (() -> Void)?
-
+    open var didSave: ((YPMediaItem) -> Void)?
+    open var didCancel: (() -> Void)?
+    
     /// Designated initializer
     public class func initWith(video: YPMediaVideo,
                                isFromSelectionVC: Bool) -> YPVideoFiltersVC {
@@ -43,10 +43,10 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     }
     
     // MARK: - Live cycle
-
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
-
+        
         trimmerView.mainColor = YPConfig.colors.trimmerMainColor
         trimmerView.handleColor = YPConfig.colors.trimmerHandleColor
         trimmerView.positionBarColor = YPConfig.colors.positionLineColor
@@ -56,10 +56,14 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         coverThumbSelectorView.thumbBorderColor = YPConfig.colors.coverSelectorBorderColor
         
         trimBottomItem.textLabel.text = YPConfig.wordings.trim
-        coverBottomItem.textLabel.text = YPConfig.wordings.cover
-
+        if YPConfig.video.showCoverButton {
+            coverBottomItem.textLabel.text = YPConfig.wordings.cover
+            coverBottomItem.button.addTarget(self, action: #selector(selectCover), for: .touchUpInside)
+        } else {
+            coverBottomItem.isHidden = true
+        }
+        
         trimBottomItem.button.addTarget(self, action: #selector(selectTrim), for: .touchUpInside)
-        coverBottomItem.button.addTarget(self, action: #selector(selectCover), for: .touchUpInside)
         
         // Remove the default and add a notification to repeat playback from the start
         videoView.removeReachEndObserver()
@@ -75,7 +79,9 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         imageGenerator?.requestedTimeToleranceAfter = CMTime.zero
         imageGenerator?.requestedTimeToleranceBefore = CMTime.zero
         didChangeThumbPosition(CMTime(seconds: 1, preferredTimescale: 1))
-        updateTimeline()
+        if YPConfig.video.showTimeline {
+            updateTimeline()
+        }
         
         // Navigation bar setup
         title = YPConfig.wordings.trim
@@ -97,7 +103,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         
         selectTrim()
         videoView.loadVideo(inputVideo)
-
+        
         super.viewDidAppear(animated)
     }
     
@@ -117,11 +123,11 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     }
     
     // MARK: - Top buttons
-
+    
     @objc public func save() {
         guard let didSave = didSave else { return print("Don't have saveCallback") }
         navigationItem.rightBarButtonItem = YPLoaders.defaultLoader
-
+        
         do {
             let asset = AVURLAsset(url: inputVideo.url)
             let trimmedAsset = try asset
@@ -134,13 +140,13 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
                 .appendingUniquePathComponent(pathExtension: YPConfig.video.fileType.fileExtension)
             
             print("trimmed result duration \(String(describing:trimmedAsset.duration.seconds))")
-
+            
             try trimmedAsset.export(to: destinationURL) { [weak self] in
                 guard let strongSelf = self else { return }
                 
                 DispatchQueue.main.async {
                     let resultVideo = YPMediaVideo(thumbnail: strongSelf.coverImageView.image!,
-                                                   videoURL: destinationURL, asset: strongSelf.inputVideo.asset)
+                                                   videoURL: destinationURL, fromCamera: strongSelf.inputVideo.fromCamera, asset: strongSelf.inputVideo.asset)
                     didSave(YPMediaItem.video(v: resultVideo))
                     strongSelf.setupRightBarButtonItem()
                 }
@@ -155,14 +161,16 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     }
     
     // MARK: - Bottom buttons
-
+    
     @objc public func selectTrim() {
         title = YPConfig.wordings.trim
         
         trimBottomItem.select()
         coverBottomItem.deselect()
-
-        timelineLabel.isHidden = false
+        
+        if YPConfig.video.showTimeline {
+            timelineLabel.isHidden = false
+        }
         trimmerView.isHidden = false
         videoView.isHidden = false
         coverImageView.isHidden = true
@@ -186,7 +194,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     }
     
     // MARK: - Various Methods
-
+    
     // Updates the bounds of the cover picker if the video is trimmed
     // TODO: Now the trimmer framework doesn't support an easy way to do this.
     // Need to rethink a flow or search other ways.
@@ -230,7 +238,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     @objc func onPlaybackTimeChecker() {
         guard let startTime = trimmerView.startTime,
             let endTime = trimmerView.endTime else {
-            return
+                return
         }
         
         let playBackTime = videoView.player.currentTime()
@@ -245,19 +253,28 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
     }
     
     func updateTimeline() {
-        let end = (trimmerView.endTime ?? inputAsset.duration).seconds
+        var end = 0.0
+        if let endTime = trimmerView.endTime {
+            end = endTime.seconds
+        } else {
+            end = min(inputAsset.duration.seconds, trimmerView.maxDuration)
+        }
+//        let end = min((trimmerView.endTime ?? inputAsset.duration).seconds, trimmerView.maxDuration)
         let start = (trimmerView.startTime ?? CMTime.zero).seconds
-        let timeRange = CMTimeRangeFromTimeToTime(start: trimmerView.startTime ?? CMTime.zero, end: trimmerView.endTime ?? inputAsset.duration)
-
+//        let timeRange = CMTimeRangeFromTimeToTime(start: trimmerView.startTime ?? CMTime.zero, end: trimmerView.endTime ?? min(inputAsset.duration, CMTimeMake(value: Int64(trimmerView!.maxDuration), timescale: inputAsset.duration.timescale) ))
+//
         let rawDuration = end-start
+        print("start: \(String(describing: start))")
+        print("end: \(String(describing: end))")
+
         let totalSeconds = round(rawDuration)
         print("raw duration \(rawDuration)")
-        print("time range duration seconds: \(timeRange.duration.seconds)")
-        print("time range duration: \(timeRange.duration)")
+//        print("time range duration seconds: \(timeRange.duration.seconds)")
+//        print("time range duration: \(timeRange.duration)")
         print("start time: \(String(describing: trimmerView.startTime))")
         print("end time: \(String(describing: trimmerView.endTime))")
-
-
+        
+        
         
         let hours:Int = Int(totalSeconds / 3600)
         let minutes:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
@@ -291,6 +308,10 @@ extension YPVideoFiltersVC: TrimmerViewDelegate {
         if YPConfig.video.showTimeline {
             updateTimeline()
         }
+        
+        let duration = (trimmerView.endTime! - trimmerView.startTime!).seconds
+        print(duration)
+
     }
 }
 
@@ -299,19 +320,19 @@ extension YPVideoFiltersVC: ThumbSelectorViewDelegate {
     public func didChangeThumbPosition(_ imageTime: CMTime) {
         print(imageTime)
         imageGenerator?.generateCGImagesAsynchronously(forTimes: [imageTime as NSValue],
-                                                  completionHandler: { (_, image, _, _, _) in
-                                                    guard let image = image else {
-                                                        return
-                                                    }
-                                                    DispatchQueue.main.async {
-                                                        self.imageGenerator?.cancelAllCGImageGeneration()
-                                                        let uiimage = UIImage(cgImage: image)
-                                                        self.coverImageView.image = uiimage
-                                                    }
+                                                       completionHandler: { (_, image, _, _, _) in
+                                                        guard let image = image else {
+                                                            return
+                                                        }
+                                                        DispatchQueue.main.async {
+                                                            self.imageGenerator?.cancelAllCGImageGeneration()
+                                                            let uiimage = UIImage(cgImage: image)
+                                                            self.coverImageView.image = uiimage
+                                                        }
         })
-//        if let imageGenerator = imageGenerator,
-//            let imageRef = try? imageGenerator.copyCGImage(at: imageTime, actualTime: nil) {
-//            coverImageView.image = coverThumbSelectorView.ima
-//        }
+        //        if let imageGenerator = imageGenerator,
+        //            let imageRef = try? imageGenerator.copyCGImage(at: imageTime, actualTime: nil) {
+        //            coverImageView.image = coverThumbSelectorView.ima
+        //        }
     }
 }
