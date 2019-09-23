@@ -78,7 +78,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         imageGenerator?.appliesPreferredTrackTransform = true
         imageGenerator?.requestedTimeToleranceAfter = CMTime.zero
         imageGenerator?.requestedTimeToleranceBefore = CMTime.zero
-        didChangeThumbPosition(CMTime(seconds: 1, preferredTimescale: 1))
+        didChangeThumbPosition(CMTime(seconds: 0, preferredTimescale: 1))
         if YPConfig.video.showTimeline {
             updateTimeline()
         }
@@ -143,6 +143,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
             
             try trimmedAsset.export(to: destinationURL) { [weak self] in
                 guard let strongSelf = self else { return }
+                
                 
                 DispatchQueue.main.async {
                     let resultVideo = YPMediaVideo(thumbnail: strongSelf.coverImageView.image!,
@@ -318,21 +319,9 @@ extension YPVideoFiltersVC: TrimmerViewDelegate {
 // MARK: - ThumbSelectorViewDelegate
 extension YPVideoFiltersVC: ThumbSelectorViewDelegate {
     public func didChangeThumbPosition(_ imageTime: CMTime) {
-        print(imageTime)
-        imageGenerator?.generateCGImagesAsynchronously(forTimes: [imageTime as NSValue],
-                                                       completionHandler: { (_, image, _, _, _) in
-                                                        guard let image = image else {
-                                                            return
-                                                        }
-                                                        DispatchQueue.main.async {
-                                                            self.imageGenerator?.cancelAllCGImageGeneration()
-                                                            let uiimage = UIImage(cgImage: image)
-                                                            self.coverImageView.image = uiimage
-                                                        }
-        })
-        //        if let imageGenerator = imageGenerator,
-        //            let imageRef = try? imageGenerator.copyCGImage(at: imageTime, actualTime: nil) {
-        //            coverImageView.image = coverThumbSelectorView.ima
-        //        }
+        if let imageGenerator = imageGenerator,
+            let imageRef = try? imageGenerator.copyCGImage(at: imageTime, actualTime: nil) {
+            coverImageView.image = UIImage(cgImage: imageRef)
+        }
     }
 }
