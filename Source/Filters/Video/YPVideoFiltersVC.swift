@@ -281,7 +281,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         let minutes:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
         let seconds:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
         
-        var labelText = NSLocalizedString("Duration: %@", comment: "")
+        var labelText = YPConfig.wordings.videoDurationPopup.title
         if hours > 0 {
             labelText = String.localizedStringWithFormat(labelText, String(format: "%i:%02i:%02i", hours, minutes, seconds))
         } else {
