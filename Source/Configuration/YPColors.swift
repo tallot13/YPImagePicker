@@ -24,8 +24,29 @@ public struct YPColors {
     public var multipleItemsSelectedCircleColor: UIColor?
     
     /// The background color of the bottom of photo and video screens.
-    public var photoVideoScreenBackground: UIColor = .white
+    public var photoVideoScreenBackgroundColor: UIColor = .white
+
+    /// The background color of the library and space between collection view cells.
+    public var libraryScreenBackgroundColor: UIColor = .white
+
+    /// The background color of safe area. For example under the menu items.
+    public var safeAreaBackgroundColor: UIColor = .white
+
+    /// A color for background of the asset container. You can see it when bouncing the image.
+    public var assetViewBackgroundColor: UIColor = .white
+
+    /// A color for background in filters.
+    public var filterBackgroundColor: UIColor = .white
+
+    /// A color for bottom buttons (photo, video, all photos).
+    public var bottomMenuItemBackgroundColor: UIColor = .clear
+
+    /// A color for for bottom buttons selected text.
+    public var bottomMenuItemSelectedTextColor: UIColor = UIColor(r: 38, g: 38, b: 38)
     
+    /// A color for for bottom buttons not selected text.
+    public var bottomMenuItemUnselectedTextColor: UIColor = UIColor(r: 153, g: 153, b: 153)
+
     // MARK: - Trimmer
     
     /// The color of the main border of the view

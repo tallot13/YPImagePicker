@@ -84,12 +84,6 @@ public struct YPImagePickerConfiguration {
     /// Defines the preferredStatusBarAppearance
     public var preferredStatusBarStyle = UIStatusBarStyle.default
     
-    /// Defines the text colour to be shown when a bottom option is selected
-    public var bottomMenuItemSelectedColour = UIColor(r: 38, g: 38, b: 38)
-    
-    /// Defines the text colour to be shown when a bottom option is unselected
-    public var bottomMenuItemUnSelectedColour = UIColor(r: 153, g: 153, b: 153)
-    
     /// List of default filters which will be added on the filter screen
     public var filters: [YPFilter] = [
         YPFilter(name: "Normal", applier: nil),
@@ -158,9 +152,12 @@ public struct YPImagePickerConfiguration {
 public struct YPConfigLibrary {
     
     public var options: PHFetchOptions? = nil
-    
-    /// Set this to true if you want to force the library output to be a squared image. Defaults to false
+
+    /// Set this to true if you want to force the library output to be a squared image. Defaults to false.
     public var onlySquare = false
+    
+    /// Sets the cropping style to square or not. Ignored if `onlySquare` is true. Defaults to true.
+    public var isSquareByDefault = true
     
     /// Minimum width, to prevent selectiong too high images. Have sense if onlySquare is true and the image is portrait.
     public var minWidthForItem: CGFloat?
