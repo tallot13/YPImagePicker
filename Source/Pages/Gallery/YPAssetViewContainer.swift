@@ -20,6 +20,7 @@ class YPAssetViewContainer: UIView {
     public let squareCropButton = UIButton()
     public let multipleSelectionButton = UIButton()
     public var onlySquare = YPConfig.library.onlySquare
+    public let isZoomEnabled = YPConfig.library.isZoomEnabled
     public var isShown = true
     
     private let spinner = UIActivityIndicatorView(style: .white)
@@ -51,6 +52,11 @@ class YPAssetViewContainer: UIView {
                 zoomableView = cv
                 zoomableView?.myDelegate = self
             }
+        }
+        
+        if !isZoomEnabled {
+            zoomableView?.isScrollEnabled = false
+            zoomableView?.pinchGestureRecognizer?.isEnabled = false
         }
         
         let touchDownGR = UILongPressGestureRecognizer(target: self,
@@ -106,7 +112,7 @@ class YPAssetViewContainer: UIView {
     }
     
     public func refreshSquareCropButton() {
-        if onlySquare {
+        if onlySquare || !isZoomEnabled {
             squareCropButton.isHidden = true
         } else {
             if let image = zoomableView?.assetImageView.image {
