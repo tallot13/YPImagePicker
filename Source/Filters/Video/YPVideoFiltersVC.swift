@@ -79,7 +79,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         imageGenerator?.appliesPreferredTrackTransform = true
         imageGenerator?.requestedTimeToleranceAfter = CMTime.zero
         imageGenerator?.requestedTimeToleranceBefore = CMTime.zero
-        didChangeThumbPosition(CMTime(seconds: 0, preferredTimescale: 1))
+        didChangeThumbPosition(CMTimeMakeWithSeconds(1, preferredTimescale: 600))
         if YPConfig.video.showTimeline {
             updateTimeline()
         }
@@ -332,6 +332,8 @@ extension YPVideoFiltersVC: ThumbSelectorViewDelegate {
         if let imageGenerator = imageGenerator,
             let imageRef = try? imageGenerator.copyCGImage(at: imageTime, actualTime: nil) {
             coverImageView.image = UIImage(cgImage: imageRef)
+        } else {
+            coverImageView.image = UIImage(color: .black)
         }
     }
 }
