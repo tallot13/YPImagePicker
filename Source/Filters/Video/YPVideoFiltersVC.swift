@@ -278,7 +278,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         print("start: \(String(describing: start))")
         print("end: \(String(describing: end))")
 
-        let totalSeconds = round(rawDuration)
+        let totalSeconds = rawDuration
         print("raw duration \(rawDuration)")
 //        print("time range duration seconds: \(timeRange.duration.seconds)")
 //        print("time range duration: \(timeRange.duration)")
@@ -287,7 +287,7 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         
         
         
-        let hours:Int = Int(totalSeconds / 3600)
+        let hours:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 86400) / 3600)
         let minutes:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
         let seconds:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
         
