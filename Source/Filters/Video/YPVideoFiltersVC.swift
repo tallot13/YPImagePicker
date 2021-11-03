@@ -290,12 +290,13 @@ public class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
         let hours:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 86400) / 3600)
         let minutes:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 3600) / 60)
         let seconds:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
+        let miliseconds:Int = Int(totalSeconds.truncatingRemainder(dividingBy: 1)*1000)
         
         var labelText = "\(YPConfig.wordings.videoDurationPopup.title): %@"
         if hours > 0 {
-            labelText = String.localizedStringWithFormat(labelText, String(format: "%i:%02i:%02i", hours, minutes, seconds))
+            labelText = String.localizedStringWithFormat(labelText, String(format: "%i:%02i:%02i,%03i", hours, minutes, seconds, miliseconds))
         } else {
-            labelText = String.localizedStringWithFormat(labelText, String(format: "%02i:%02i", minutes, seconds))
+            labelText = String.localizedStringWithFormat(labelText, String(format: "%02i:%02i,%03i", minutes, seconds, miliseconds))
         }
         
         timelineLabel.text = labelText
