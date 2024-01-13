@@ -163,6 +163,10 @@ public final class YPVideoFiltersVC: UIViewController, IsMediaFilterVC {
                 coverThumbSelectorView
             )
         )
+        if !YPConfig.video.showCoverButton {
+            coverBottomItem.isHidden = true
+            trimBottomItem.isHidden = true
+        }
 
         trimBottomItem.leading(0).height(40)
         trimBottomItem.Bottom == view.safeAreaLayoutGuide.Bottom
